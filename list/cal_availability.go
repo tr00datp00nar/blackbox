@@ -22,8 +22,10 @@ import (
 
 const calendarIDEnvKey = "CALENDAR_ID"
 
-//go:embed templates/results.tmpl
-var tmpl string
+type DateRange struct {
+	Start time.Time
+	End   time.Time
+}
 
 func getAvailability() {
 	userConfigDir, err := getUserConfig()
@@ -113,14 +115,22 @@ func getAvailability() {
 	if err != nil {
 		log.Fatalf("Failed to create file: %v", err)
 	}
+
+	initDateRange := DateRange{
+		Start: start,
+		End:   end,
+	}
+	t := template.Must(template.New("header").Parse(headerTmpl))
+
+	err = t.Execute(file, initDateRange)
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+		return
+	}
+
 	defer file.Close()
 
-	t := template.Must(template.New("dates").Parse(tmpl))
-
-	type DateRange struct {
-		Start time.Time
-		End   time.Time
-	}
+	t = template.Must(template.New("dates").Parse(bodyTmpl))
 
 	var dateRanges []DateRange
 	start = noEventDates[0]

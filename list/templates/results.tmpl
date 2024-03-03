@@ -1,4 +1,3 @@
-I have reviewed our calendar, and the following dates are currently available:
 {{range .}}{{if eq .Start .End}}{{.Start.Format "01/02/2006"}}
 {{else}}{{.Start.Format "01/02/2006"}} - {{.End.Format "01/02/2006"}}
 {{end}}{{end}}
