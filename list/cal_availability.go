@@ -98,16 +98,45 @@ func getAvailability() {
 	}
 	defer file.Close()
 
-	for _, noEventDate := range noEventDates {
-		if _, err := file.WriteString(noEventDate.Format("Mon 01/02/2006") + "\n"); err != nil {
-			log.Fatalf("Failed to write to file: %v", err)
+	start = noEventDates[0]
+	end = noEventDates[0]
+
+	for i := 1; i < len(noEventDates); i++ {
+		current := noEventDates[i]
+		previous := noEventDates[i-1]
+		diff := current.Sub(previous)
+
+		if diff.Hours()/24 == 1 {
+			end = current
+		} else {
+			if start.Equal(end) {
+				file.WriteString(start.Format("Mon 01/02/2006") + "\n")
+			} else {
+				file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
+			}
+			start = current
+			end = current
 		}
 	}
 
-	// Print list of dates with no events
-	for _, noEventDate := range noEventDates {
-		fmt.Println(noEventDate)
+	if start.Equal(end) {
+		file.WriteString(start.Format("Mon 01/02/2006") + "\n")
+	} else {
+		file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
 	}
+
+	fmt.Println("Dates written to", fileLocation)
+
+	// for _, noEventDate := range noEventDates {
+	// 	if _, err := file.WriteString(noEventDate.Format("Mon 01/02/2006") + "\n"); err != nil {
+	// 		log.Fatalf("Failed to write to file: %v", err)
+	// 	}
+	// }
+
+	// Print list of dates with no events
+	// for _, noEventDate := range noEventDates {
+	// 	fmt.Println(noEventDate)
+	// }
 }
 
 // Retrieve a token, saves the token, then returns the generated client.

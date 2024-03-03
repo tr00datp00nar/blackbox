@@ -33,7 +33,13 @@ Rename the `.env.example` file as `.env` and replace the necessary values. The f
 
 ## Installation
 
-- Clone this repository using `git clone https://github.com/tr00datp00nar/blackbox` and run `go install .` from within that directory
+- Clone this repository using `git clone https://github.com/tr00datp00nar/blackbox.git` and run:
+
+```bash
+go install .
+```
+
+from within that directory.
 
 - Download one of the [release binaries](https://github.com/tr00datp00nar/blackbox/releases):
 
