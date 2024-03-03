@@ -3,6 +3,8 @@ package list
 import (
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/help"
+
+	gcal "github.com/tr00datp00nar/blackbox/google_calendar"
 )
 
 var Cmd = &Z.Cmd{
@@ -36,7 +38,7 @@ var availableCmd = &Z.Cmd{
 	},
 
 	Call: func(_ *Z.Cmd, args ...string) error {
-		getAvailability()
+		gcal.GetAvailability()
 		return nil
 	},
 }

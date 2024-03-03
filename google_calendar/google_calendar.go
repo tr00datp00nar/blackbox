@@ -1,4 +1,4 @@
-package list
+package google_calendar
 
 import (
 	"context"
@@ -10,43 +10,101 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"time"
 
-	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/option"
+
+	"github.com/tr00datp00nar/blackbox/utils"
 )
 
 const calendarIDEnvKey = "CALENDAR_ID"
+
+// func createNewEvent() {
+// 	// Load Environment Variables
+// 	utils.LoadEnvVars()
+// 	// Read credentials from file
+// 	ctx := context.Background()
+// 	b, err := os.ReadFile(filepath.Join(utils.UserConfigDir, "credentials.json"))
+// 	if err != nil {
+// 		log.Fatalf("Unable to read client secret file: %v", err)
+// 	}
+
+// 	// Generate new client
+// 	// If modifying these scopes, delete your previously saved token.json.
+// 	config, err := google.ConfigFromJSON(b, calendar.CalendarEventsScope)
+// 	if err != nil {
+// 		log.Fatalf("Unable to parse client secret file to config: %v", err)
+// 	}
+// 	client := getClient(config)
+
+// 	// Create new service
+// 	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
+// 	if err != nil {
+// 		log.Fatalf("Unable to retrieve Calendar client: %v", err)
+// 	}
+
+// 	// Get all events from calendar
+// 	events, err := srv.Events.List(calendarIDEnvKey).Do()
+// 	if err != nil {
+// 		log.Fatalf("Unable to retrieve calendar events: %v", err)
+// 	}
+
+// 	for _, item := range events.Items {
+// 		start := item.Start.DateTime
+// 		if item.Start.TimeZone != "" {
+// 			start = item.Start.TimeZone + ":" + start
+// 		}
+// 		end := item.End.DateTime
+// 		if item.End.TimeZone != "" {
+// 			end = item.End.TimeZone + ":" + end
+// 		}
+// 		fmt.Printf("%s (%s)\n", start, end)
+// 	}
+
+// 	// Check if event id matches in notion database
+// 	// Get the Notion client
+// 	notionClient := update.ConnectNotion()
+
+// 	// Get all pages in the database
+// 	dbPages := update.GetScheduledEvents(context.Background(), notionClient)
+// 	if err != nil {
+// 		log.Fatalf("Unable to retrieve Notion database pages: %v", err)
+// 	}
+
+// 	// Loop through the events and check if the event ID exists in the Notion database
+// 	for _, event := range events.Items {
+// 		eventID := event.Id
+// 		for _, dbPage := range dbPages.Object {
+// 			for _, prop := range dbPage {
+// 				if prop.ID == "event_id" && prop.Type == "title" {
+// 					for _, title := range prop.Title {
+// 						if title.Text.Content == eventID {
+// 							fmt.Printf("Event ID %s found in Notion database\n", eventID)
+// 							break
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
+// func updateEvent()    {}
 
 type DateRange struct {
 	Start time.Time
 	End   time.Time
 }
 
-func getAvailability() {
-	userConfigDir, err := getUserConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	switch runtime.GOOS {
-	case "linux":
-		err = godotenv.Load(userConfigDir + "/.env")
-	case "darwin":
-		err = godotenv.Load(userConfigDir + "/.env")
-	case "windows":
-		err = godotenv.Load(userConfigDir + "\\.env")
-	}
-	if err != nil {
-		log.Fatal("Could not read from .env:", err)
-	}
+func GetAvailability() {
+	// Load Environment Variables
+	utils.LoadEnvVars()
 	// Read credentials from file
 	ctx := context.Background()
-	b, err := os.ReadFile(filepath.Join(userConfigDir, "credentials.json"))
+	b, err := os.ReadFile(filepath.Join(utils.UserConfigDir, "credentials.json"))
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -120,7 +178,7 @@ func getAvailability() {
 		Start: start,
 		End:   end,
 	}
-	t := template.Must(template.New("header").Parse(headerTmpl))
+	t := template.Must(template.New("header").Parse(HeaderTmpl))
 
 	err = t.Execute(file, initDateRange)
 	if err != nil {
@@ -130,7 +188,7 @@ func getAvailability() {
 
 	defer file.Close()
 
-	t = template.Must(template.New("dates").Parse(bodyTmpl))
+	t = template.Must(template.New("dates").Parse(BodyTmpl))
 
 	var dateRanges []DateRange
 	start = noEventDates[0]
@@ -159,50 +217,11 @@ func getAvailability() {
 	}
 
 	fmt.Println("Dates written to", fileLocation)
-
-	// start = noEventDates[0]
-	// end = noEventDates[0]
-
-	// for i := 1; i < len(noEventDates); i++ {
-	// 	current := noEventDates[i]
-	// 	previous := noEventDates[i-1]
-	// 	diff := current.Sub(previous)
-
-	// 	if diff.Hours()/24 == 1 {
-	// 		end = current
-	// 	} else {
-	// 		if start.Equal(end) {
-	// 			file.WriteString(start.Format("Mon 01/02/2006") + "\n")
-	// 		} else {
-	// 			file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
-	// 		}
-	// 		start = current
-	// 		end = current
-	// 	}
-	// }
-
-	// if start.Equal(end) {
-	// 	file.WriteString(start.Format("Mon 01/02/2006") + "\n")
-	// } else {
-	// 	file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
-	// }
-
-	// fmt.Println("Dates written to", fileLocation)
-}
-
-// Retrieves the user config location.
-func getUserConfig() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		log.Fatal(err)
-	}
-	configDir := filepath.Join(userConfigDir, "blackbox")
-	return configDir, err
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
 func getClient(config *oauth2.Config) *http.Client {
-	configDir, err := getUserConfig()
+	configDir, err := utils.GetUserConfig()
 	if err != nil {
 		log.Fatal(err)
 	}

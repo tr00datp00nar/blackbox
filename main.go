@@ -9,6 +9,7 @@ import (
 	"github.com/rwxrob/help"
 
 	"github.com/tr00datp00nar/blackbox/list"
+	"github.com/tr00datp00nar/blackbox/update"
 )
 
 func init() {
@@ -42,6 +43,7 @@ var Cmd = &Z.Cmd{
 		help.Cmd,
 		good.Cmd,
 		list.Cmd,
+		update.Cmd,
 	},
 
 	Shortcuts: Z.ArgMap{
