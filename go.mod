@@ -4,6 +4,7 @@ go 1.21.6
 
 require (
 	github.com/joho/godotenv v1.5.1
+	github.com/jomei/notionapi v1.12.10
 	github.com/rwxrob/bonzai v0.20.10
 	github.com/rwxrob/good v0.1.4
 	github.com/rwxrob/help v0.7.2
