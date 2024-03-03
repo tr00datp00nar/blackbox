@@ -44,5 +44,7 @@ var Cmd = &Z.Cmd{
 		list.Cmd,
 	},
 
-	Shortcuts: Z.ArgMap{},
+	Shortcuts: Z.ArgMap{
+		`avail`: {`list`, `available`},
+	},
 }

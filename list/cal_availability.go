@@ -2,11 +2,15 @@ package list
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -18,14 +22,29 @@ import (
 
 const calendarIDEnvKey = "CALENDAR_ID"
 
+//go:embed templates/results.tmpl
+var tmpl string
+
 func getAvailability() {
-	err := godotenv.Load(".env")
+	userConfigDir, err := getUserConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	switch runtime.GOOS {
+	case "linux":
+		err = godotenv.Load(userConfigDir + "/.env")
+	case "darwin":
+		err = godotenv.Load(userConfigDir + "/.env")
+	case "windows":
+		err = godotenv.Load(userConfigDir + "\\.env")
+	}
 	if err != nil {
 		log.Fatal("Could not read from .env:", err)
 	}
 	// Read credentials from file
 	ctx := context.Background()
-	b, err := os.ReadFile("credentials.json")
+	b, err := os.ReadFile(filepath.Join(userConfigDir, "credentials.json"))
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -43,8 +62,6 @@ func getAvailability() {
 	if err != nil {
 		log.Fatalf("Unable to retrieve Calendar client: %v", err)
 	}
-
-	//------------------------------------------------------------------------
 
 	// Get date range from user
 	var start, end time.Time
@@ -98,6 +115,14 @@ func getAvailability() {
 	}
 	defer file.Close()
 
+	t := template.Must(template.New("dates").Parse(tmpl))
+
+	type DateRange struct {
+		Start time.Time
+		End   time.Time
+	}
+
+	var dateRanges []DateRange
 	start = noEventDates[0]
 	end = noEventDates[0]
 
@@ -109,42 +134,72 @@ func getAvailability() {
 		if diff.Hours()/24 == 1 {
 			end = current
 		} else {
-			if start.Equal(end) {
-				file.WriteString(start.Format("Mon 01/02/2006") + "\n")
-			} else {
-				file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
-			}
+			dateRanges = append(dateRanges, DateRange{Start: start, End: end})
 			start = current
 			end = current
 		}
 	}
 
-	if start.Equal(end) {
-		file.WriteString(start.Format("Mon 01/02/2006") + "\n")
-	} else {
-		file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
+	dateRanges = append(dateRanges, DateRange{Start: start, End: end})
+
+	err = t.Execute(file, dateRanges)
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+		return
 	}
 
 	fmt.Println("Dates written to", fileLocation)
 
-	// for _, noEventDate := range noEventDates {
-	// 	if _, err := file.WriteString(noEventDate.Format("Mon 01/02/2006") + "\n"); err != nil {
-	// 		log.Fatalf("Failed to write to file: %v", err)
+	// start = noEventDates[0]
+	// end = noEventDates[0]
+
+	// for i := 1; i < len(noEventDates); i++ {
+	// 	current := noEventDates[i]
+	// 	previous := noEventDates[i-1]
+	// 	diff := current.Sub(previous)
+
+	// 	if diff.Hours()/24 == 1 {
+	// 		end = current
+	// 	} else {
+	// 		if start.Equal(end) {
+	// 			file.WriteString(start.Format("Mon 01/02/2006") + "\n")
+	// 		} else {
+	// 			file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
+	// 		}
+	// 		start = current
+	// 		end = current
 	// 	}
 	// }
 
-	// Print list of dates with no events
-	// for _, noEventDate := range noEventDates {
-	// 	fmt.Println(noEventDate)
+	// if start.Equal(end) {
+	// 	file.WriteString(start.Format("Mon 01/02/2006") + "\n")
+	// } else {
+	// 	file.WriteString(start.Format("Mon 01/02/2006") + " - " + end.Format("Mon 01/02/2006") + "\n")
 	// }
+
+	// fmt.Println("Dates written to", fileLocation)
+}
+
+// Retrieves the user config location.
+func getUserConfig() (string, error) {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	configDir := filepath.Join(userConfigDir, "blackbox")
+	return configDir, err
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
 func getClient(config *oauth2.Config) *http.Client {
+	configDir, err := getUserConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := "token.json"
+	tokFile := filepath.Join(configDir, "token.json")
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok = getTokenFromWeb(config)
