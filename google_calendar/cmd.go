@@ -1,21 +1,19 @@
-package list
+package google_calendar
 
 import (
 	Z "github.com/rwxrob/bonzai/z"
 	"github.com/rwxrob/help"
-
-	gcal "github.com/tr00datp00nar/blackbox/google_calendar"
 )
 
 var Cmd = &Z.Cmd{
-	Name:        `list`,
+	Name:        `gcal`,
 	Aliases:     []string{``},
-	Usage:       `COMMAND`,
+	Usage:       `[help]`,
 	Version:     `v0.0.1`,
 	Copyright:   `Copyright Micah Nadler 2024`,
 	License:     `Apache-2.0`,
-	Summary:     help.S(_list),
-	Description: help.D(_list),
+	Summary:     help.S(_gcal),
+	Description: help.D(_gcal),
 
 	Commands: []*Z.Cmd{
 		help.Cmd,
@@ -38,7 +36,7 @@ var availableCmd = &Z.Cmd{
 	},
 
 	Call: func(_ *Z.Cmd, args ...string) error {
-		gcal.GetAvailability()
+		GetAvailability()
 		return nil
 	},
 }

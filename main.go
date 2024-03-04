@@ -8,8 +8,8 @@ import (
 	"github.com/rwxrob/good" // Common Go tools
 	"github.com/rwxrob/help"
 
-	"github.com/tr00datp00nar/blackbox/list"
-	"github.com/tr00datp00nar/blackbox/update"
+	gcal "github.com/tr00datp00nar/blackbox/google_calendar"
+	"github.com/tr00datp00nar/blackbox/notion"
 )
 
 func init() {
@@ -41,12 +41,12 @@ var Cmd = &Z.Cmd{
 
 	Commands: []*Z.Cmd{
 		help.Cmd,
+		gcal.Cmd,
 		good.Cmd,
-		list.Cmd,
-		update.Cmd,
+		notion.Cmd,
 	},
 
 	Shortcuts: Z.ArgMap{
-		`avail`: {`list`, `available`},
+		`avail`: {`gcal`, `available`},
 	},
 }

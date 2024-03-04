@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,7 +23,7 @@ func GetUserConfig() (string, error) {
 }
 
 // Loads environment variables from  a .env file if it exists in the UserConfigDir
-func LoadEnvVars() {
+func LoadEnvVars() (string, error) {
 	UserConfigDir, err := GetUserConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -37,6 +38,7 @@ func LoadEnvVars() {
 		err = godotenv.Load(UserConfigDir + "\\.env")
 	}
 	if err != nil {
-		log.Fatal("Could not read from .env:", err)
+		_, err = fmt.Printf("Could not read from .env: %v", err)
 	}
+	return UserConfigDir, err
 }
