@@ -41,7 +41,7 @@ go install .
 
 from within that directory.
 
-- Download one of the [release binaries](https://github.com/tr00datp00nar/blackbox/releases):
+- (NOT RECOMMENDED) Download one of the [release binaries](https://github.com/tr00datp00nar/blackbox/releases):
 
 ```bash
 curl -L https://github.com/tr00datp00nar/blackbox/releases/latest/download/blackbox-linux-amd64 -o ~/.local/bin/tr00datp00nar
@@ -50,7 +50,7 @@ curl -L https://github.com/tr00datp00nar/blackbox/releases/latest/download/black
 curl -L https://github.com/tr00datp00nar/blackbox/releases/latest/download/blackbox-windows-amd64 -o ~/.local/bin/tr00datp00nar
 ```
 
-- Install directly with `go`:
+- (NOT RECOMMENEDED) Install directly with `go`:
 
 ```bash
 go install github.com/tr00datp00nar/blackbox@latest
