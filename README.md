@@ -11,6 +11,16 @@
   - CALENDAR_ID
   - RESULTS_LOC
 
+### Setting up the configuration location
+
+The blackbox tool looks for configuration in the following directories:
+
+- Linux: `$XDG_CONFIG_DIR/blackbox`
+- Windows: `%APPDATA%\blackbox`
+- macOS: `$HOME/Library/blackbox`
+
+Create the directory if it doesn't exist, using your preferred method.
+
 ### Creating Google Cloud Oauth Credentials
 
 1. Log in to the Google Cloud Console
@@ -20,28 +30,38 @@
 5. Search for `Google Calendar API` and select and enable it
 6. Navigate to "Credentials"
 7. Click "+ CREATE CREDENTIALS" > "+ OAuth client ID"
-8. Configure the OAuth Consent Screen > External
+8. Configure the OAuth Consent Screen
+
+   - External is the default if you aren't using a Google Workspaces account.
+
 9. Navigate back to "Credentials"
 10. Click "+ CREATE CREDENTIALS" > "+ OAuth client ID"
-11. Application type: Desktop app
+11. Select Application type: Desktop app
 12. Name your application, e.g., "blackbox"
-13. Download JSON as credentials.json
+13. Download your credentials JSON as credentials.json
 
 ### Creating your .env file
 
-Rename the `.env.example` file as `.env` and replace the necessary values. The format is KEY=VALUE.
+```bash
+cp  .env.example /path/to/your/config/directory/.env
+```
+
+Edit the `.env` as needed
 
 ## Installation
 
-- Clone this repository using `git clone https://github.com/tr00datp00nar/blackbox.git` and run:
+### Local Clone (RECOMMENDED)
+
+1. Clone this repository using `git clone https://github.com/tr00datp00nar/blackbox.git` and from within that directory, run:
 
 ```bash
 go install .
 ```
 
-from within that directory.
+2. Create the necessary configuration directory from above.
+3. Make sure that the configuration directory is populated with your `.env` and `credentials.json` files.
 
-- (NOT RECOMMENDED) Download one of the [release binaries](https://github.com/tr00datp00nar/blackbox/releases):
+### Download one of the [release binaries](https://github.com/tr00datp00nar/blackbox/releases) (NOT RECOMMENDED):
 
 ```bash
 curl -L https://github.com/tr00datp00nar/blackbox/releases/latest/download/blackbox-linux-amd64 -o ~/.local/bin/tr00datp00nar
@@ -50,7 +70,7 @@ curl -L https://github.com/tr00datp00nar/blackbox/releases/latest/download/black
 curl -L https://github.com/tr00datp00nar/blackbox/releases/latest/download/blackbox-windows-amd64 -o ~/.local/bin/tr00datp00nar
 ```
 
-- (NOT RECOMMENEDED) Install directly with `go`:
+### Install directly with `go` (NOT RECOMMENEDED):
 
 ```bash
 go install github.com/tr00datp00nar/blackbox@latest
