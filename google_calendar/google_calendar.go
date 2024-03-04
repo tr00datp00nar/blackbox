@@ -101,10 +101,13 @@ type DateRange struct {
 
 func GetAvailability() {
 	// Load Environment Variables
-	utils.LoadEnvVars()
+	UserConfigDir, err := utils.LoadEnvVars()
+	if err != nil {
+		log.Printf("Unable to load environment variables: %v", err)
+	}
 	// Read credentials from file
 	ctx := context.Background()
-	b, err := os.ReadFile(filepath.Join(utils.UserConfigDir, "credentials.json"))
+	b, err := os.ReadFile(filepath.Join(UserConfigDir, "credentials.json"))
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
